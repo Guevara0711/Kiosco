@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,287 +12,472 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Kiosco'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              // TODO: Implementar notificaciones
-            },
+      backgroundColor: Colors.grey[50],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header con saludo y iconos
+                _buildHeader(),
+                const SizedBox(height: 30),
+                
+                // Tabs Home y Category
+                _buildTabs(),
+                const SizedBox(height: 30),
+                
+                // Banner promocional
+                _buildPromoBanner(),
+                const SizedBox(height: 30),
+                
+                // Sección New Arrivals
+                _buildNewArrivalsSection(),
+              ],
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.shopping_cart_outlined),
-            onPressed: () {
-              // TODO: Implementar carrito
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Saludo personalizado
-            Text(
-              '¡Hola! 👋',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '¿Qué buscas hoy?',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-            ),
-            const SizedBox(height: 24),
-
-            // Barra de búsqueda
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: 'Buscar productos...',
-                  prefixIcon: const Icon(Icons.search),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                ),
-                onTap: () {
-                  // TODO: Navegar a la página de búsqueda
-                },
-                readOnly: true,
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Banner promocional
-            Container(
-              width: double.infinity,
-              height: 160,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.secondary,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '¡Ofertas especiales!',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Descubre productos con hasta 50% de descuento',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white70,
-                          ),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        // TODO: Navegar a ofertas
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Theme.of(context).colorScheme.primary,
-                      ),
-                      child: const Text('Ver ofertas'),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
-
-            // Categorías
-            Text(
-              'Categorías',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 100,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  _buildCategoryItem(
-                    context,
-                    icon: Icons.fastfood,
-                    label: 'Comida',
-                    color: Colors.orange,
-                  ),
-                  _buildCategoryItem(
-                    context,
-                    icon: Icons.local_drink,
-                    label: 'Bebidas',
-                    color: Colors.blue,
-                  ),
-                  _buildCategoryItem(
-                    context,
-                    icon: Icons.shopping_basket,
-                    label: 'Despensa',
-                    color: Colors.green,
-                  ),
-                  _buildCategoryItem(
-                    context,
-                    icon: Icons.cake,
-                    label: 'Dulces',
-                    color: Colors.pink,
-                  ),
-                  _buildCategoryItem(
-                    context,
-                    icon: Icons.more_horiz,
-                    label: 'Más',
-                    color: Colors.grey,
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-
-            // Productos populares
-            Text(
-              'Productos populares',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 220,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 5,
-                itemBuilder: (context, index) {
-                  return _buildProductCard(context, index);
-                },
-              ),
-            ),
-          ],
         ),
       ),
     );
   }
 
-  Widget _buildCategoryItem(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    required Color color,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(right: 16),
-      child: Column(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        // Avatar y saludo
+        Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+                color: Colors.grey[300],
+              ),
+              child: Icon(
+                FIcons.user,
+                color: Colors.grey[600],
+                size: 30,
+              ),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 30,
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Hi, Jonathan',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                Text(
+                  "Let's go shopping",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        const Spacer(),
+        // Iconos de la derecha
+        Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(
+                FIcons.search,
+                color: Colors.grey[700],
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Stack(
+                children: [
+                  Center(
+                    child: Icon(
+                      FIcons.bell,
+                      color: Colors.grey[700],
+                      size: 20,
+                    ),
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTabs() {
+    return Row(
+      children: [
+        Column(
+          children: [
+            Text(
+              'Home',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey[800],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              width: 40,
+              height: 3,
+              decoration: BoxDecoration(
+                color: Colors.blue[600],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(width: 40),
+        Text(
+          'Category',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey[400],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPromoBanner() {
+    return Container(
+      width: double.infinity,
+      height: 170,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            Colors.blue[100]!,
+            Colors.grey[100]!,
+          ],
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Círculo decorativo
+          Positioned(
+            left: -30,
+            top: -30,
+            child: Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.blue[200]!.withOpacity(0.6),
+                shape: BoxShape.circle,
+              ),
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall,
+          // Contenido del banner
+          Padding(
+            padding: const EdgeInsets.all(25.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '24% off shipping today',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                Text(
+                  'on bag purchases',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'By Kutuku Store',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Imagen de la bolsa
+          Positioned(
+            right: 20,
+            top: 20,
+            bottom: 20,
+            child: Container(
+              width: 100,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: Colors.grey[300],
+              ),
+              child: Icon(
+                FIcons.shoppingBag,
+                color: Colors.grey[600],
+                size: 40,
+              ),
+            ),
+          ),
+          // Indicadores de página
+          Positioned(
+            bottom: 15,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: Colors.blue,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildProductCard(BuildContext context, int index) {
-    final products = [
-      {'name': 'Coca Cola', 'price': '\$2.50', 'image': '🥤'},
-      {'name': 'Sandwich', 'price': '\$4.99', 'image': '🥪'},
-      {'name': 'Galletas', 'price': '\$1.75', 'image': '🍪'},
-      {'name': 'Café', 'price': '\$3.25', 'image': '☕'},
-      {'name': 'Papas', 'price': '\$2.99', 'image': '🍟'},
-    ];
+  Widget _buildNewArrivalsSection() {
+    return Column(
+      children: [
+        // Header de la sección
+        Row(
+          children: [
+            Text(
+              'New Arrivals 🔥',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[800],
+              ),
+            ),
+            const Spacer(),
+            Text(
+              'See All',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.blue[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        
+        // Grid de productos
+        Row(
+          children: [
+            Expanded(
+              child: _buildProductCard(
+                'The Mirac Jiz',
+                'Lisa Robber',
+                '\$195.00',
+              ),
+            ),
+            const SizedBox(width: 15),
+            Expanded(
+              child: _buildProductCard(
+                'Meriza Kiles',
+                'Gazuna Resika',
+                '\$143.45',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 15),
+        Row(
+          children: [
+            Expanded(
+              child: _buildProductCard(
+                'Product 3',
+                'Brand Name',
+                '\$89.99',
+              ),
+            ),
+            const SizedBox(width: 15),
+            Expanded(
+              child: _buildProductCard(
+                'Product 4',
+                'Brand Name',
+                '\$125.00',
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 
-    final product = products[index % products.length];
-
+  Widget _buildProductCard(String name, String brand, String price) {
     return Container(
-      width: 150,
-      margin: const EdgeInsets.only(right: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
             spreadRadius: 1,
-            blurRadius: 6,
-            offset: const Offset(0, 3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Imagen del producto
           Container(
-            height: 120,
+            height: 140,
             decoration: BoxDecoration(
-              color: Colors.grey[50],
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(15),
+                topRight: Radius.circular(15),
               ),
+              color: Colors.grey[200],
             ),
-            child: Center(
-              child: Text(
-                product['image']!,
-                style: const TextStyle(fontSize: 48),
-              ),
+            child: Stack(
+              children: [
+                Center(
+                  child: Icon(
+                    FIcons.shoppingBag,
+                    color: Colors.grey[400],
+                    size: 50,
+                  ),
+                ),
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      FIcons.heart,
+                      color: Colors.grey[600],
+                      size: 16,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
+          
+          // Información del producto
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  product['name']!,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                  name,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  product['price']!,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  brand,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[500],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  price,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
                 ),
               ],
             ),

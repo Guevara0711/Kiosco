@@ -18,8 +18,10 @@ class AppConstants {
   static const String userTable = 'users';
   static const String productsTable = 'products';
   static const String ordersTable = 'orders';
+  static const String orderItemsTable = 'order_items';
   static const String favoritesTable = 'favorites';
   static const String cartTable = 'cart';
+  static const String userSettingsTable = 'user_settings';
   
   // Configuración de la aplicación
   static const String appName = 'Kiosco';

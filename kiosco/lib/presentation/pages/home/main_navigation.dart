@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 import 'package:kiosco/presentation/pages/home/home_page.dart';
-import 'package:kiosco/presentation/pages/search/search_page.dart';
 import 'package:kiosco/presentation/pages/orders/my_orders_page.dart';
 import 'package:kiosco/presentation/pages/favorites/favorites_page.dart';
 import 'package:kiosco/presentation/pages/profile/profile_page.dart';
@@ -13,12 +13,11 @@ class MainNavigation extends StatefulWidget {
 }
 
 class _MainNavigationState extends State<MainNavigation> {
-  int _currentIndex = 0;
+  int index = 0;
 
   final List<Widget> _pages = [
     const HomePage(),
-    const SearchPage(),
-    const MyOrdersPage(),
+    const MyOrdersPage(), 
     const FavoritesPage(),
     const ProfilePage(),
   ];
@@ -27,42 +26,28 @@ class _MainNavigationState extends State<MainNavigation> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
-        index: _currentIndex,
+        index: index,
         children: _pages,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Inicio',
+      bottomNavigationBar: FBottomNavigationBar(
+        index: index,
+        onChange: (newIndex) => setState(() => index = newIndex),
+        children: [
+          FBottomNavigationBarItem(
+            icon: Icon(FIcons.house),
+            label: const Text('Home'),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search_outlined),
-            activeIcon: Icon(Icons.search),
-            label: 'Buscar',
+          FBottomNavigationBarItem(
+            icon: Icon(FIcons.truck),
+            label: const Text('My Order'),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag_outlined),
-            activeIcon: Icon(Icons.shopping_bag),
-            label: 'Pedidos',
+          FBottomNavigationBarItem(
+            icon: Icon(FIcons.heart),
+            label: const Text('Favorite'),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_outline),
-            activeIcon: Icon(Icons.favorite),
-            label: 'Favoritos',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Perfil',
+          FBottomNavigationBarItem(
+            icon: Icon(FIcons.user),
+            label: const Text('My Profile'),
           ),
         ],
       ),

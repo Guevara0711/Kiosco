@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:kiosco/data/repositories/auth_repository.dart';
 import 'package:kiosco/presentation/pages/auth/register_page.dart';
 import 'package:kiosco/presentation/pages/home/main_navigation.dart';
+import 'package:kiosco/core/utils/app_utils.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,6 +15,7 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _authRepository = AuthRepository();
   bool _isPasswordVisible = false;
   bool _isLoading = false;
 
@@ -29,15 +32,26 @@ class _LoginPageState extends State<LoginPage> {
         _isLoading = true;
       });
 
-      // Simular proceso de login
-      await Future.delayed(const Duration(seconds: 2));
+      final result = await _authRepository.login(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
 
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const MainNavigation(),
-          ),
-        );
+        if (result.success) {
+          AppUtils.showSuccessSnackBar(context, result.message);
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => const MainNavigation(),
+            ),
+          );
+        } else {
+          AppUtils.showErrorSnackBar(context, result.message);
+        }
       }
     }
   }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:kiosco/data/repositories/auth_repository.dart';
+import 'package:kiosco/core/utils/app_utils.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -13,6 +15,8 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _authRepository = AuthRepository();
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   bool _isLoading = false;
@@ -23,6 +27,7 @@ class _RegisterPageState extends State<RegisterPage> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -32,18 +37,24 @@ class _RegisterPageState extends State<RegisterPage> {
         _isLoading = true;
       });
 
-      // Simular proceso de registro
-      await Future.delayed(const Duration(seconds: 2));
+      final result = await _authRepository.register(
+        name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        phone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
 
       if (mounted) {
-        // Mostrar mensaje de éxito y volver al login
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Cuenta creada exitosamente. Por favor inicia sesión.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.of(context).pop();
+        if (result.success) {
+          AppUtils.showSuccessSnackBar(context, result.message);
+          Navigator.of(context).pop();
+        } else {
+          AppUtils.showErrorSnackBar(context, result.message);
+        }
       }
     }
   }
@@ -122,6 +133,23 @@ class _RegisterPageState extends State<RegisterPage> {
                                 }
                                 if (!value.contains('@')) {
                                   return 'Ingresa un email válido';
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _phoneController,
+                              keyboardType: TextInputType.phone,
+                              decoration: const InputDecoration(
+                                labelText: 'Teléfono (opcional)',
+                                prefixIcon: Icon(Icons.phone_outlined),
+                              ),
+                              validator: (value) {
+                                if (value != null && value.isNotEmpty) {
+                                  if (!AppUtils.isValidPhone(value)) {
+                                    return 'Ingresa un teléfono válido';
+                                  }
                                 }
                                 return null;
                               },
