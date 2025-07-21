@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
+import '../product/product_detail_page.dart';
 
 class FavoritesPage extends StatefulWidget {
   const FavoritesPage({super.key});
@@ -8,42 +10,51 @@ class FavoritesPage extends StatefulWidget {
 }
 
 class _FavoritesPageState extends State<FavoritesPage> {
+  final TextEditingController _searchController = TextEditingController();
+  String _selectedFilter = 'All';
+  final List<String> _filterOptions = ['All', 'Latest', 'Most Popular', 'Cheapest'];
+
+  // Lista de favoritos con datos más realistas
   List<Map<String, dynamic>> _favorites = [
     {
       'id': '1',
-      'name': 'Coca Cola',
-      'price': '\$2.50',
-      'image': '🥤',
-      'category': 'Bebidas',
-      'description': 'Bebida refrescante con gas',
-      'available': true,
+      'name': 'Box Headphone 234',
+      'price': '\$66.00',
+      'image': 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop',
+      'store': 'Upbox Bag',
+      'isFavorite': true,
+      'rating': 4.5,
+      'reviews': 128,
     },
     {
       'id': '2',
-      'name': 'Sandwich de jamón',
-      'price': '\$4.99',
-      'image': '🥪',
-      'category': 'Comida',
-      'description': 'Sandwich fresco con jamón y vegetales',
-      'available': true,
+      'name': 'Box Bag 892',
+      'price': '\$152.00',
+      'image': 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop',
+      'store': 'Upbox Bag',
+      'isFavorite': true,
+      'rating': 4.8,
+      'reviews': 89,
     },
     {
       'id': '3',
-      'name': 'Café americano',
-      'price': '\$3.25',
-      'image': '☕',
-      'category': 'Bebidas',
-      'description': 'Café negro recién preparado',
-      'available': false,
+      'name': 'Box Bag 234',
+      'price': '\$97.00',
+      'image': 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=400&fit=crop',
+      'store': 'Upbox Bag',
+      'isFavorite': true,
+      'rating': 4.3,
+      'reviews': 156,
     },
     {
       'id': '4',
-      'name': 'Galletas de chocolate',
-      'price': '\$1.75',
-      'image': '🍪',
-      'category': 'Dulces',
-      'description': 'Galletas crujientes con chispas de chocolate',
-      'available': true,
+      'name': 'Box Headphone 992',
+      'price': '\$69.00',
+      'image': 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&h=400&fit=crop',
+      'store': 'Upbox Bag',
+      'isFavorite': true,
+      'rating': 4.7,
+      'reviews': 203,
     },
   ];
 
@@ -60,22 +71,34 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  void _addToCart(Map<String, dynamic> product) {
-    if (!product['available']) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Este producto no está disponible actualmente'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
+  void _toggleFavorite(String productId) {
+    setState(() {
+      final index = _favorites.indexWhere((product) => product['id'] == productId);
+      if (index != -1) {
+        _favorites[index]['isFavorite'] = !_favorites[index]['isFavorite'];
+        if (!_favorites[index]['isFavorite']) {
+          _favorites.removeAt(index);
+        }
+      }
+    });
+  }
 
-    // TODO: Implementar agregar al carrito
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${product['name']} agregado al carrito'),
-        backgroundColor: Colors.green,
+  void _navigateToProduct(Map<String, dynamic> product) {
+    // Convertir el precio de String a double
+    String priceStr = product['price'].toString().replaceAll('\$', '');
+    double priceDouble = double.tryParse(priceStr) ?? 0.0;
+    
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProductDetailPage(
+          productId: product['id'],
+          productName: product['name'],
+          productImage: product['image'],
+          price: priceDouble,
+          rating: product['rating'].toDouble(),
+          brand: product['store'],
+        ),
       ),
     );
   }
@@ -83,20 +106,139 @@ class _FavoritesPageState extends State<FavoritesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Favoritos'),
-        actions: [
-          if (_favorites.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.delete_sweep),
-              onPressed: _showClearAllDialog,
-              tooltip: 'Limpiar favoritos',
+      backgroundColor: Colors.grey[50],
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'My Favorite',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Stack(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          // Acción de notificaciones
+                        },
+                        icon: Icon(FIcons.bell, size: 24),
+                      ),
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-        ],
+
+            // Barra de búsqueda
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search something...',
+                    hintStyle: TextStyle(color: Colors.grey[400]),
+                    prefixIcon: Icon(FIcons.search, size: 20, color: Colors.grey[400]),
+                    suffixIcon: Container(
+                      margin: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(Icons.tune, size: 18, color: Colors.grey[600]),
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Filtros horizontales
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: _filterOptions.map((filter) {
+                    final isSelected = filter == _selectedFilter;
+                    return Container(
+                      margin: const EdgeInsets.only(right: 12),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedFilter = filter;
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected ? const Color(0xFF3B82F6) : Colors.white,
+                            borderRadius: BorderRadius.circular(25),
+                            border: Border.all(
+                              color: isSelected ? const Color(0xFF3B82F6) : Colors.grey.shade300,
+                            ),
+                          ),
+                          child: Text(
+                            filter,
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : Colors.grey[600],
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Grid de productos favoritos
+            Expanded(
+              child: _favorites.isEmpty
+                  ? _buildEmptyState()
+                  : _buildFavoritesGrid(),
+            ),
+          ],
+        ),
       ),
-      body: _favorites.isEmpty
-          ? _buildEmptyState()
-          : _buildFavoritesList(),
     );
   }
 
@@ -115,26 +257,38 @@ class _FavoritesPageState extends State<FavoritesPage> {
             const SizedBox(height: 24),
             Text(
               'No tienes favoritos',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[600],
-                  ),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[600],
+              ),
             ),
             const SizedBox(height: 12),
             Text(
               'Los productos que marques como favoritos\naparecerán aquí para acceso rápido',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
-            ElevatedButton.icon(
+            ElevatedButton(
               onPressed: () {
-                // TODO: Navegar a la página principal
+                // Navegar a la página principal
               },
-              icon: const Icon(Icons.shopping_bag),
-              label: const Text('Explorar productos'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Explorar productos'),
             ),
           ],
         ),
@@ -142,341 +296,148 @@ class _FavoritesPageState extends State<FavoritesPage> {
     );
   }
 
-  Widget _buildFavoritesList() {
-    return Column(
-      children: [
-        // Header con contador
-        Container(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Icon(
-                Icons.favorite,
-                color: Colors.red[400],
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '${_favorites.length} producto${_favorites.length == 1 ? '' : 's'} favorito${_favorites.length == 1 ? '' : 's'}',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-            ],
-          ),
+  Widget _buildFavoritesGrid() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 0.75,
         ),
-        
-        // Lista de favoritos
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: _favorites.length,
-            itemBuilder: (context, index) {
-              final product = _favorites[index];
-              return _buildFavoriteCard(product);
-            },
-          ),
-        ),
-      ],
+        itemCount: _favorites.length,
+        itemBuilder: (context, index) {
+          final product = _favorites[index];
+          return _buildProductCard(product);
+        },
+      ),
     );
   }
 
-  Widget _buildFavoriteCard(Map<String, dynamic> product) {
-    final isAvailable = product['available'] as bool;
-    
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: () {
-          _showProductDetails(product);
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              // Imagen del producto
-              Container(
-                width: 80,
-                height: 80,
+  Widget _buildProductCard(Map<String, dynamic> product) {
+    return GestureDetector(
+      onTap: () => _navigateToProduct(product),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Imagen del producto
+            Expanded(
+              flex: 3,
+              child: Container(
                 decoration: BoxDecoration(
-                  color: isAvailable ? Colors.grey[100] : Colors.grey[200],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Stack(
-                    children: [
-                      Text(
-                        product['image'],
-                        style: TextStyle(
-                          fontSize: 36,
-                          color: isAvailable ? null : Colors.grey,
-                        ),
-                      ),
-                      if (!isAvailable)
-                        Positioned.fill(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.grey.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.not_interested,
-                                color: Colors.red,
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
+                  color: Colors.grey[100],
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
                   ),
                 ),
+                child: Stack(
+                  children: [
+                    // Placeholder para imagen (simulando carga de red)
+                    Container(
+                      width: double.infinity,
+                      height: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(16),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.image,
+                        size: 40,
+                        color: Colors.grey[400],
+                      ),
+                    ),
+                    // Botón de favorito
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: GestureDetector(
+                        onTap: () => _toggleFavorite(product['id']),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.9),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            product['isFavorite'] ? Icons.favorite : Icons.favorite_border,
+                            color: product['isFavorite'] ? Colors.red : Colors.grey,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              
-              const SizedBox(width: 16),
-              
-              // Información del producto
-              Expanded(
+            ),
+            
+            // Información del producto
+            Expanded(
+              flex: 2,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            product['name'],
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: isAvailable ? null : Colors.grey,
-                                ),
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.favorite, color: Colors.red),
-                          onPressed: () => _removeFromFavorites(product['id']),
-                          tooltip: 'Eliminar de favoritos',
-                        ),
-                      ],
-                    ),
-                    
-                    Text(
-                      product['category'],
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Colors.grey[600],
-                          ),
-                    ),
-                    
-                    const SizedBox(height: 4),
-                    
-                    Text(
-                      product['description'],
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: isAvailable ? Colors.grey[700] : Colors.grey,
-                          ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    
-                    const SizedBox(height: 8),
-                    
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          product['price'],
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                color: isAvailable 
-                                    ? Theme.of(context).colorScheme.primary 
-                                    : Colors.grey,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          product['name'],
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        
-                        ElevatedButton.icon(
-                          onPressed: isAvailable 
-                              ? () => _addToCart(product)
-                              : null,
-                          icon: const Icon(Icons.add_shopping_cart, size: 18),
-                          label: Text(isAvailable ? 'Agregar' : 'No disponible'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
-                            ),
+                        const SizedBox(height: 4),
+                        Text(
+                          product['store'],
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 12,
                           ),
                         ),
                       ],
+                    ),
+                    Text(
+                      product['price'],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showProductDetails(Map<String, dynamic> product) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        maxChildSize: 0.9,
-        minChildSize: 0.4,
-        expand: false,
-        builder: (context, scrollController) => SingleChildScrollView(
-          controller: scrollController,
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Handle
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Imagen del producto
-                Center(
-                  child: Text(
-                    product['image'],
-                    style: const TextStyle(fontSize: 80),
-                  ),
-                ),
-                
-                const SizedBox(height: 24),
-                
-                // Información del producto
-                Text(
-                  product['name'],
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                
-                const SizedBox(height: 8),
-                
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        product['category'],
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      product['price'],
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 16),
-                
-                Text(
-                  'Descripción',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                
-                const SizedBox(height: 8),
-                
-                Text(
-                  product['description'],
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                
-                const SizedBox(height: 32),
-                
-                // Botones de acción
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => _removeFromFavorites(product['id']),
-                        icon: const Icon(Icons.favorite_border),
-                        label: const Text('Quitar de favoritos'),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: product['available'] 
-                            ? () => _addToCart(product)
-                            : null,
-                        icon: const Icon(Icons.add_shopping_cart),
-                        label: const Text('Agregar al carrito'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
             ),
-          ),
+          ],
         ),
-      ),
-    );
-  }
-
-  void _showClearAllDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Limpiar favoritos'),
-        content: const Text(
-          '¿Estás seguro de que quieres eliminar todos los productos de tus favoritos?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              setState(() {
-                _favorites.clear();
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Favoritos eliminados'),
-                ),
-              );
-            },
-            child: const Text('Eliminar todo'),
-          ),
-        ],
       ),
     );
   }
