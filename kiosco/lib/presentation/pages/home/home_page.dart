@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import '../product/product_detail_page.dart';
+import '../search/search_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -129,7 +130,12 @@ class _HomePageState extends State<HomePage> {
             FHeaderAction(
               icon: Icon(FIcons.search, size: 20),
               onPress: () {
-                // TODO: Implementar búsqueda
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SearchPage(),
+                  ),
+                );
               },
             ),
             FHeaderAction(

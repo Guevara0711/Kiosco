@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
+import 'search_results_page.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -9,16 +11,50 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
-  List<String> _searchHistory = [
-    'Coca Cola',
-    'Sandwich',
-    'Café',
-    'Galletas',
-    'Agua',
+  
+  // Datos dummy para las búsquedas anteriores
+  List<String> _lastSearches = [
+    'Electronics',
+    'Pants',
+    'Three Second',
+    'Long shirt',
   ];
   
-  List<Map<String, String>> _searchResults = [];
-  bool _isSearching = false;
+  // Datos dummy para búsquedas populares
+  final List<Map<String, dynamic>> _popularSearches = [
+    {
+      'name': 'Lunilo Hits jacket',
+      'searches': '1.6k Search today',
+      'tag': 'Hot',
+      'color': Colors.red[100],
+      'tagColor': Colors.red,
+      'image': 'jacket',
+    },
+    {
+      'name': 'Denim Jeans',
+      'searches': '1k Search today',
+      'tag': 'New',
+      'color': Colors.orange[100],
+      'tagColor': Colors.orange,
+      'image': 'jeans',
+    },
+    {
+      'name': 'Redil Backpack',
+      'searches': '1,23k Search today',
+      'tag': 'Popular',
+      'color': Colors.green[100],
+      'tagColor': Colors.green,
+      'image': 'backpack',
+    },
+    {
+      'name': 'JBL Speakers',
+      'searches': '1,1k Search today',
+      'tag': 'New',
+      'color': Colors.orange[100],
+      'tagColor': Colors.orange,
+      'image': 'speaker',
+    },
+  ];
 
   @override
   void dispose() {
@@ -27,279 +63,355 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void _performSearch(String query) {
-    if (query.isEmpty) {
-      setState(() {
-        _searchResults = [];
-        _isSearching = false;
-      });
-      return;
+    if (query.trim().isNotEmpty) {
+      // Agregar a búsquedas anteriores
+      _addToLastSearches(query.trim());
+      
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SearchResultsPage(
+            searchQuery: query.trim(),
+          ),
+        ),
+      );
     }
+  }
 
+  void _addToLastSearches(String query) {
     setState(() {
-      _isSearching = true;
-    });
-
-    // Simular búsqueda
-    Future.delayed(const Duration(milliseconds: 500), () {
-      if (mounted) {
-        setState(() {
-          _searchResults = _getMockResults(query);
-          _isSearching = false;
-        });
+      if (_lastSearches.contains(query)) {
+        _lastSearches.remove(query);
+      }
+      _lastSearches.insert(0, query);
+      if (_lastSearches.length > 6) {
+        _lastSearches = _lastSearches.take(6).toList();
       }
     });
   }
 
-  List<Map<String, String>> _getMockResults(String query) {
-    final allProducts = [
-      {'name': 'Coca Cola', 'price': '\$2.50', 'image': '🥤', 'category': 'Bebidas'},
-      {'name': 'Coca Cola Zero', 'price': '\$2.50', 'image': '🥤', 'category': 'Bebidas'},
-      {'name': 'Sandwich de jamón', 'price': '\$4.99', 'image': '🥪', 'category': 'Comida'},
-      {'name': 'Sandwich de pollo', 'price': '\$5.99', 'image': '🥪', 'category': 'Comida'},
-      {'name': 'Galletas de chocolate', 'price': '\$1.75', 'image': '🍪', 'category': 'Dulces'},
-      {'name': 'Galletas saladas', 'price': '\$1.50', 'image': '🍪', 'category': 'Snacks'},
-      {'name': 'Café americano', 'price': '\$3.25', 'image': '☕', 'category': 'Bebidas'},
-      {'name': 'Café con leche', 'price': '\$3.75', 'image': '☕', 'category': 'Bebidas'},
-      {'name': 'Papas fritas', 'price': '\$2.99', 'image': '🍟', 'category': 'Snacks'},
-      {'name': 'Agua mineral', 'price': '\$1.25', 'image': '💧', 'category': 'Bebidas'},
-    ];
-
-    return allProducts
-        .where((product) =>
-            product['name']!.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+  void _clearLastSearches() {
+    setState(() {
+      _lastSearches.clear();
+    });
   }
 
-  void _addToSearchHistory(String query) {
-    if (_searchHistory.contains(query)) {
-      _searchHistory.remove(query);
-    }
-    _searchHistory.insert(0, query);
-    if (_searchHistory.length > 10) {
-      _searchHistory = _searchHistory.take(10).toList();
-    }
+  void _removeLastSearch(int index) {
+    setState(() {
+      _lastSearches.removeAt(index);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: TextField(
-          controller: _searchController,
-          decoration: const InputDecoration(
-            hintText: 'Buscar productos...',
-            border: InputBorder.none,
-            suffixIcon: Icon(Icons.search),
-          ),
-          onChanged: _performSearch,
-          onSubmitted: (query) {
-            if (query.isNotEmpty) {
-              _addToSearchHistory(query);
-            }
-          },
-          autofocus: true,
-        ),
-        actions: [
-          if (_searchController.text.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.clear),
-              onPressed: () {
-                _searchController.clear();
-                setState(() {
-                  _searchResults = [];
-                  _isSearching = false;
-                });
-              },
-            ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Filtros de categoría
-          if (_searchResults.isNotEmpty || _isSearching) ...[
-            Container(
-              height: 50,
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: [
-                  _buildFilterChip('Todos', true),
-                  _buildFilterChip('Bebidas', false),
-                  _buildFilterChip('Comida', false),
-                  _buildFilterChip('Snacks', false),
-                  _buildFilterChip('Dulces', false),
-                ],
+      backgroundColor: Colors.grey[50],
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header con barra de búsqueda
+            _buildSearchHeader(),
+            
+            // Contenido principal
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Sección de búsquedas anteriores
+                      if (_lastSearches.isNotEmpty) ...[
+                        _buildLastSearchSection(),
+                        const SizedBox(height: 30),
+                      ],
+                      
+                      // Sección de búsquedas populares
+                      _buildPopularSearchSection(),
+                    ],
+                  ),
+                ),
               ),
             ),
-            const Divider(height: 1),
           ],
+        ),
+      ),
+    );
+  }
 
-          // Contenido principal
+  Widget _buildSearchHeader() {
+    return Container(
+      padding: const EdgeInsets.all(20.0),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              child: Icon(
+                FIcons.chevronLeft,
+                color: Colors.grey[700],
+                size: 24,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
           Expanded(
-            child: _buildMainContent(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(25),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: TextField(
+                controller: _searchController,
+                autofocus: true,
+                onSubmitted: _performSearch,
+                decoration: InputDecoration(
+                  hintText: 'Search products...',
+                  hintStyle: TextStyle(
+                    color: Colors.grey[500],
+                    fontSize: 16,
+                  ),
+                  prefixIcon: Icon(
+                    FIcons.search,
+                    color: Colors.grey[500],
+                    size: 20,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(25),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFilterChip(String label, bool isSelected) {
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      child: FilterChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (selected) {
-          // TODO: Implementar filtros
-        },
-      ),
-    );
-  }
-
-  Widget _buildMainContent() {
-    if (_isSearching) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-
-    if (_searchController.text.isEmpty) {
-      return _buildSearchHistory();
-    }
-
-    if (_searchResults.isEmpty) {
-      return _buildNoResults();
-    }
-
-    return _buildSearchResults();
-  }
-
-  Widget _buildSearchHistory() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
+  Widget _buildLastSearchSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Búsquedas recientes',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              'Last Search',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[800],
+              ),
             ),
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _searchHistory.clear();
-                });
-              },
-              child: const Text('Limpiar'),
+            const Spacer(),
+            GestureDetector(
+              onTap: _clearLastSearches,
+              child: Text(
+                'Clear All',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.blue[600],
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ],
         ),
         const SizedBox(height: 16),
-        ..._searchHistory.map((query) => ListTile(
-              leading: const Icon(Icons.history),
-              title: Text(query),
-              trailing: IconButton(
-                icon: const Icon(Icons.call_made),
-                onPressed: () {
-                  _searchController.text = query;
-                  _performSearch(query);
-                },
+        Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: _lastSearches.asMap().entries.map((entry) {
+            int index = entry.key;
+            String search = entry.value;
+            
+            return GestureDetector(
+              onTap: () => _performSearch(search),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      search,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    GestureDetector(
+                      onTap: () => _removeLastSearch(index),
+                      child: Icon(
+                        FIcons.x,
+                        size: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              onTap: () {
-                _searchController.text = query;
-                _performSearch(query);
-              },
-            )),
+            );
+          }).toList(),
+        ),
       ],
     );
   }
 
-  Widget _buildNoResults() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.search_off,
-            size: 64,
-            color: Colors.grey[400],
+  Widget _buildPopularSearchSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Popular Search',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey[800],
           ),
-          const SizedBox(height: 16),
-          Text(
-            'No se encontraron resultados',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Intenta con otros términos de búsqueda',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        ),
+        const SizedBox(height: 16),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: _popularSearches.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final item = _popularSearches[index];
+            return _buildPopularSearchItem(
+              item['name'],
+              item['searches'],
+              item['tag'],
+              item['color'],
+              item['tagColor'],
+              item['image'],
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPopularSearchItem(
+    String name,
+    String searches,
+    String tag,
+    Color backgroundColor,
+    Color tagColor,
+    String imageType,
+  ) {
+    return GestureDetector(
+      onTap: () => _performSearch(name),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Imagen del producto
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Icon(
+                  _getIconForType(imageType),
                   color: Colors.grey[600],
+                  size: 30,
                 ),
-          ),
-        ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            
+            // Información del producto
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    searches,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Tag
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                tag,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: tagColor,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSearchResults() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: _searchResults.length,
-      itemBuilder: (context, index) {
-        final product = _searchResults[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            leading: Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Center(
-                child: Text(
-                  product['image']!,
-                  style: const TextStyle(fontSize: 24),
-                ),
-              ),
-            ),
-            title: Text(
-              product['name']!,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-            subtitle: Text(product['category']!),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  product['price']!,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 4),
-                IconButton(
-                  icon: const Icon(Icons.add_shopping_cart),
-                  iconSize: 20,
-                  onPressed: () {
-                    // TODO: Agregar al carrito
-                  },
-                ),
-              ],
-            ),
-            onTap: () {
-              // TODO: Navegar a detalle del producto
-            },
-          ),
-        );
-      },
-    );
+  IconData _getIconForType(String type) {
+    switch (type) {
+      case 'jacket':
+        return FIcons.shirt;
+      case 'jeans':
+        return FIcons.shirt;
+      case 'backpack':
+        return FIcons.backpack;
+      case 'speaker':
+        return FIcons.speaker;
+      default:
+        return FIcons.package;
+    }
   }
 }
