@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import '../product/product_detail_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -617,18 +618,52 @@ class _HomePageState extends State<HomePage> {
         Row(
           children: [
             Expanded(
-              child: _buildProductCard(
-                'The Mirac Jiz',
-                'Lisa Robber',
-                '\$195.00',
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProductDetailPage(
+                        productId: '1',
+                        productName: 'The Mirac Jiz',
+                        productImage: '',
+                        price: 195.00,
+                        rating: 4.8,
+                        brand: 'Lisa Robber',
+                      ),
+                    ),
+                  );
+                },
+                child: _buildProductCard(
+                  'The Mirac Jiz',
+                  'Lisa Robber',
+                  '\$195.00',
+                ),
               ),
             ),
             const SizedBox(width: 15),
             Expanded(
-              child: _buildProductCard(
-                'Meriza Kiles',
-                'Gazuna Resika',
-                '\$143.45',
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProductDetailPage(
+                        productId: '2',
+                        productName: 'Meriza Kiles',
+                        productImage: '',
+                        price: 143.45,
+                        rating: 4.6,
+                        brand: 'Gazuna Resika',
+                      ),
+                    ),
+                  );
+                },
+                child: _buildProductCard(
+                  'Meriza Kiles',
+                  'Gazuna Resika',
+                  '\$143.45',
+                ),
               ),
             ),
           ],
@@ -637,18 +672,52 @@ class _HomePageState extends State<HomePage> {
         Row(
           children: [
             Expanded(
-              child: _buildProductCard(
-                'Product 3',
-                'Brand Name',
-                '\$89.99',
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProductDetailPage(
+                        productId: '3',
+                        productName: 'Product 3',
+                        productImage: '',
+                        price: 89.99,
+                        rating: 4.2,
+                        brand: 'Brand Name',
+                      ),
+                    ),
+                  );
+                },
+                child: _buildProductCard(
+                  'Product 3',
+                  'Brand Name',
+                  '\$89.99',
+                ),
               ),
             ),
             const SizedBox(width: 15),
             Expanded(
-              child: _buildProductCard(
-                'Product 4',
-                'Brand Name',
-                '\$125.00',
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProductDetailPage(
+                        productId: '4',
+                        productName: 'Product 4',
+                        productImage: '',
+                        price: 125.00,
+                        rating: 4.5,
+                        brand: 'Brand Name',
+                      ),
+                    ),
+                  );
+                },
+                child: _buildProductCard(
+                  'Product 4',
+                  'Brand Name',
+                  '\$125.00',
+                ),
               ),
             ),
           ],
