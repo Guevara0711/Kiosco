@@ -11,11 +11,33 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   PageController _pageController = PageController();
   int _currentPage = 0;
+  int _selectedTab = 0; // 0 = Home, 1 = Category
+  bool _isTransitioning = false;
+  
+  final GlobalKey _homeKey = GlobalKey();
+  final GlobalKey _categoryKey = GlobalKey();
 
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  double _getTabPosition(GlobalKey key) {
+    final RenderBox? renderBox = key.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null) {
+      final position = renderBox.localToGlobal(Offset.zero);
+      return position.dx - 20; // Ajustar por el padding del contenedor
+    }
+    return 0;
+  }
+
+  double _getTabWidth(GlobalKey key) {
+    final RenderBox? renderBox = key.currentContext?.findRenderObject() as RenderBox?;
+    if (renderBox != null) {
+      return renderBox.size.width;
+    }
+    return 40; // Valor por defecto
   }
 
   @override
@@ -37,12 +59,29 @@ class _HomePageState extends State<HomePage> {
                 _buildTabs(),
                 const SizedBox(height: 25),
                 
-                // Banner promocional
-                _buildPromoBanner(),
-                const SizedBox(height: 30),
-                
-                // Sección New Arrivals
-                _buildNewArrivalsSection(),
+                // Contenido dinámico con transición mejorada
+                _isTransitioning 
+                  ? Container(
+                      height: 200,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.blue[600]!),
+                        ),
+                      ),
+                    )
+                  : AnimatedOpacity(
+                      opacity: 1.0,
+                      duration: const Duration(milliseconds: 400),
+                      child: AnimatedScale(
+                        scale: 1.0,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOutBack,
+                        child: _selectedTab == 0 
+                          ? _buildHomeContent() 
+                          : _buildCategoryContent(),
+                      ),
+                    ),
               ],
             ),
           ),
@@ -121,49 +160,278 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildTabs() {
-    return Row(
-      children: [
-        Stack(
-          alignment: Alignment.bottomCenter,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 11), // Espacio para la barra
-              child: Text(
-                'Home',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[800],
+            // Contenedor de tabs
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    if (_selectedTab != 0) {
+                      setState(() {
+                        _isTransitioning = true;
+                      });
+                      Future.delayed(const Duration(milliseconds: 150), () {
+                        if (mounted) {
+                          setState(() {
+                            _selectedTab = 0;
+                            _isTransitioning = false;
+                          });
+                        }
+                      });
+                    }
+                  },
+                  child: Container(
+                    key: _homeKey,
+                    padding: const EdgeInsets.only(bottom: 11),
+                    child: Text(
+                      'Home',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: _selectedTab == 0 ? Colors.grey[800] : Colors.grey[400],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 40),
+                GestureDetector(
+                  onTap: () {
+                    if (_selectedTab != 1) {
+                      setState(() {
+                        _isTransitioning = true;
+                      });
+                      Future.delayed(const Duration(milliseconds: 150), () {
+                        if (mounted) {
+                          setState(() {
+                            _selectedTab = 1;
+                            _isTransitioning = false;
+                          });
+                        }
+                      });
+                    }
+                  },
+                  child: Container(
+                    key: _categoryKey,
+                    padding: const EdgeInsets.only(bottom: 11),
+                    child: Text(
+                      'Category',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: _selectedTab == 1 ? Colors.grey[800] : Colors.grey[400],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            // Barra indicadora animada
+            Positioned(
+              bottom: 0,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                transform: Matrix4.translationValues(
+                  _selectedTab == 0 
+                    ? _getTabPosition(_homeKey)
+                    : _getTabPosition(_categoryKey),
+                  0,
+                  0,
+                ),
+                child: Container(
+                  width: _selectedTab == 0 
+                    ? _getTabWidth(_homeKey) 
+                    : _getTabWidth(_categoryKey),
+                  height: 3,
+                  decoration: BoxDecoration(
+                    color: Colors.blue[600],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
             ),
-            Positioned(
-              bottom: 0,
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildHomeContent() {
+    return Column(
+      key: const ValueKey('home'),
+      children: [
+        // Banner promocional
+        _buildPromoBanner(),
+        const SizedBox(height: 30),
+        
+        // Sección New Arrivals
+        _buildNewArrivalsSection(),
+      ],
+    );
+  }
+
+  Widget _buildCategoryContent() {
+    return Column(
+      key: const ValueKey('category'),
+      children: [
+        // Grid de categorías
+        _buildCategoryGrid(),
+      ],
+    );
+  }
+
+  Widget _buildCategoryGrid() {
+    final categories = [
+      {'title': 'New Arrivals', 'products': '208 Product', 'color': Colors.grey[200]!, 'textColor': Colors.black},
+      {'title': 'Clothes', 'products': '358 Product', 'color': Colors.green[100]!, 'textColor': Colors.black},
+      {'title': 'Bags', 'products': '160 Product', 'color': Colors.grey[200]!, 'textColor': Colors.black},
+      {'title': 'Shoes', 'products': '230 Product', 'color': Colors.grey[200]!, 'textColor': Colors.black},
+      {'title': 'Electronics', 'products': '120 Product', 'color': Colors.grey[200]!, 'textColor': Colors.black},
+    ];
+
+    return Column(
+      children: [
+        // Primera fila - New Arrivals (full width)
+        _buildCategoryCard(
+          categories[0]['title'] as String,
+          categories[0]['products'] as String,
+          categories[0]['color'] as Color,
+          categories[0]['textColor'] as Color,
+          isFullWidth: true,
+          height: 160,
+        ),
+        const SizedBox(height: 15),
+        
+        // Segunda fila - Clothes (full width)
+        _buildCategoryCard(
+          categories[1]['title'] as String,
+          categories[1]['products'] as String,
+          categories[1]['color'] as Color,
+          categories[1]['textColor'] as Color,
+          isFullWidth: true,
+          height: 160,
+        ),
+        const SizedBox(height: 15),
+        
+        // Tercera fila - Bags (full width)
+        _buildCategoryCard(
+          categories[2]['title'] as String,
+          categories[2]['products'] as String,
+          categories[2]['color'] as Color,
+          categories[2]['textColor'] as Color,
+          isFullWidth: true,
+          height: 160,
+        ),
+        const SizedBox(height: 15),
+        
+        // Cuarta fila - Shoes (full width)
+        _buildCategoryCard(
+          categories[3]['title'] as String,
+          categories[3]['products'] as String,
+          categories[3]['color'] as Color,
+          categories[3]['textColor'] as Color,
+          isFullWidth: true,
+          height: 160,
+        ),
+        const SizedBox(height: 15),
+        
+        // Quinta fila - Electronics (full width)
+        _buildCategoryCard(
+          categories[4]['title'] as String,
+          categories[4]['products'] as String,
+          categories[4]['color'] as Color,
+          categories[4]['textColor'] as Color,
+          isFullWidth: true,
+          height: 160,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategoryCard(String title, String products, Color bgColor, Color textColor, {bool isFullWidth = false, double height = 140}) {
+    return Container(
+      width: isFullWidth ? double.infinity : null,
+      height: height,
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            // Texto lado izquierdo
+            Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    products,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: textColor.withOpacity(0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Imagen lado derecho
+            Expanded(
+              flex: 3,
               child: Container(
-                width: 40,
-                height: 3,
                 decoration: BoxDecoration(
-                  color: Colors.blue[600],
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Container(
+                    color: Colors.white.withOpacity(0.1),
+                    child: Center(
+                      child: Icon(
+                        _getCategoryIcon(title),
+                        size: 60,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
           ],
         ),
-        const SizedBox(width: 40),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 11), // Mismo padding para alinear
-          child: Text(
-            'Category',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Colors.grey[400],
-            ),
-          ),
-        ),
-      ],
+      ),
     );
+  }
+
+  IconData _getCategoryIcon(String category) {
+    switch (category) {
+      case 'New Arrivals':
+        return FIcons.package;
+      case 'Clothes':
+        return FIcons.shirt;
+      case 'Bags':
+        return FIcons.shoppingBag;
+      case 'Shoes':
+        return FIcons.footprints;
+      case 'Electronics':
+        return FIcons.smartphone;
+      default:
+        return FIcons.package;
+    }
   }
 
   Widget _buildPromoBanner() {
