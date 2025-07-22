@@ -38,8 +38,8 @@ class _MainNavigationState extends State<MainNavigation> {
             label: const Text('Home'),
           ),
           FBottomNavigationBarItem(
-            icon: Icon(FIcons.truck),
-            label: const Text('My Order'),
+            icon: Icon(FIcons.shoppingCart),
+            label: const Text('Cart'),
           ),
           FBottomNavigationBarItem(
             icon: Icon(FIcons.heart),
